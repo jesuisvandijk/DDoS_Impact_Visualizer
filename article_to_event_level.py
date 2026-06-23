@@ -53,7 +53,7 @@ UMAP_MIN_DIST    = 0.15   # 0.0-0.5, lower = tighter clusters
 # Toggle descriptions, dashboard and graphs
 # ─────────────────────────────────────────────────────────────────────────────
 
-GENERATE_EVENT_DESCRIPTION = False #Toggle to generate the description for events, takes a very long time
+GENERATE_EVENT_DESCRIPTION = True #Toggle to generate the description for events, takes a very long time
 LAUNCH_DASH = True #Toggle to automatically launch dashboard
 SHOW_GRAPHS = False #Show all files in screen
 

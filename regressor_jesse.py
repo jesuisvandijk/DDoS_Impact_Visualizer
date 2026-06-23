@@ -59,7 +59,6 @@ def get_data(filepath, news_only=False):
     features = embed_articles(add_entities_to_df(df,content_col),content_col)
     return df, features
 
-#Manualy edit to return the correct pipeline.
 def build_best_pipeline():
     return make_pipeline(
 
@@ -120,7 +119,6 @@ def create_confusion_plot(features, labels, dimension_name):
     print('\nFULL REPORT')
     print(f"  MAE      : {np.mean(maes):.3f}  (std: {np.std(maes):.3f})")
     print(f"  RMSE     : {rmse:.3f}")
-    #print(f"  R²       : {r2:.3f}")
     print(f"  Spearman : {spearman:.3f}")
 
     conf_mat = confusion_matrix(test_lab_final, pred_lab_final, labels=score_levels)

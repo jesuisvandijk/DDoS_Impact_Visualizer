@@ -1,0 +1,157 @@
+# DDoS Impact Visualizer
+
+A pipeline for clustering news articles about DDoS events and visualizing their multidimensional impact across Political, Economic, Social, and Technological (PEST) dimensions.
+
+---
+
+## Overview
+
+This artifact ingests Google Alert news data, annotates each article with PEST impact scores using a local LLM, groups articles into events via NLP-based clustering, and presents the results in an interactive Streamlit dashboard.
+
+**Pipeline stages:**
+1. Scrape article content from links
+2. Annotate articles with PEST scores (LLM)
+3. Extract named entities (cyNER + spaCy)
+4. Embed articles (sentence transformers)
+5. Reduce dimensions (UMAP)
+6. Cluster into events (HDBSCAN)
+7. Visualize in dashboard (Streamlit)
+
+---
+
+## Requirements
+
+- Python 3.9+
+- [Ollama](https://ollama.com/) running locally on `http://localhost:11434` with `llama3.2:1b` pulled
+- Dependencies listed in `requirements.txt`
+
+Install dependencies:
+```bash
+pip install -r requirements.txt
+python -m spacy download en_core_web_sm
+```
+
+---
+
+## Using the Artifact on Your Own Dataset
+
+### Step 1 — Prepare your data
+
+Upload your Google Alerts export into the `Data/` folder. The file should be `.xlsx` format (e.g. `data.xlsx`). The dataset must contain at least these columns:
+
+| Column | Description |
+|--------|-------------|
+| Title | Article headline |
+| Content | Article body (can be empty before scraping) |
+| Link | URL to the original article |
+| Date | Publication date |
+| Type | Alert type (e.g. `News`, `Blog`) |
+
+### Step 2 — Scrape article content
+
+Run `scrape.py` to enrich the `Content` column by scraping full article text from the links:
+
+```bash
+python scrape.py --input data.xlsx --output new_dataset.json --type-filter News --max-rows 1000
+```
+
+| Argument | Description |
+|----------|-------------|
+| `--input` | Your uploaded `.xlsx` file |
+| `--output` | Output `.json` file used by the rest of the pipeline |
+| `--type-filter` | Filter by alert type (`News`, `Blog`, etc.) |
+| `--max-rows` | Maximum number of rows to scrape |
+
+### Step 3 — Annotate with PEST scores
+
+Open `ollama_annotate.py` and set `input_path` to your output file from Step 2. Also set the `DATA_FILE` variable in `article_to_event_level.py` to your desired output path for the annotated dataset.
+
+Then run:
+
+```bash
+python ollama_annotate.py
+```
+
+This uses `llama3.2:1b` (via Ollama) to score each article on the four PEST dimensions (0–3) and flag irrelevant articles. **This step can take a long time** depending on dataset size.
+
+**Score scale:**
+
+| Score | Meaning |
+|-------|---------|
+| 0 | No meaningful content relating to this dimension |
+| 1 | Minor or indirect mention (peripheral) |
+| 2 | Moderate coverage (discussed but not main focus) |
+| 3 | Primary focus (central to the article) |
+
+### Step 4 — Run the clustering pipeline
+
+```bash
+python article_to_event_level.py
+```
+
+This runs the full NLP pipeline: entity extraction, embedding, UMAP dimensionality reduction, HDBSCAN clustering, PEST aggregation per event, and launches the dashboard.
+
+**Key settings** (edit at the top of `article_to_event_level.py`):
+
+| Setting | Default | Effect |
+|---------|---------|--------|
+| `HDBSCAN_MIN_CLUSTER_SIZE` | `4` | Minimum articles to form an event. Increase to reduce tiny clusters; decrease if too many articles are noise (`-1`). |
+| `HDBSCAN_MIN_SAMPLES` | `4` | Higher = more conservative clustering, more noise. |
+| `UMAP_N_NEIGHBORS` | `10` | Controls local vs global structure (5–50). |
+| `UMAP_MIN_DIST` | `0.0` | Controls cluster tightness (0.0–0.5). |
+| `GENERATE_EVENT_DESCRIPTION` | `False` | Toggle to generate LLM summaries per event. Slow, but results are cached. |
+
+> **Note:** Cache files (`Cache/`) store embeddings and entity extractions to speed up re-runs. **Delete the cache when switching to a new dataset.**
+
+---
+
+## Dashboard
+
+The dashboard launches automatically after running `article_to_event_level.py`, or can be started manually:
+
+```bash
+streamlit run streamlit_app.py
+```
+
+### Landing page
+
+The homepage gives an overview of all detected events and explains the scoring rubric. The sidebar (accessible from any page) contains:
+
+- **Semantic search bar** — search for events by keyword. Uses sentence embedding similarity rather than exact keyword matching, so related terms will also surface relevant events.
+- **Event list** — all detected events with article counts and a button to navigate to each event's detail page.
+
+Clicking the dimension labels on the landing page shows a detailed scoring rubric for that dimension.
+
+### Event detail page
+
+Each event page shows:
+
+- **Radar chart** — average PEST scores across all articles in the event, visualizing the event's impact profile at a glance.
+- **Event description** — a 3-sentence LLM-generated summary covering what happened, who was affected, and key technical details. Generated by `llama3.2:1b` from the combined article content.
+- **Article table** — all articles belonging to the event, with toggleable columns including content, date, link, PEST scores, and extracted entities (organizations, malware, indicators, systems, etc.).
+
+---
+
+## File Structure
+
+```
+├── Data/                        # Input and output datasets
+├── Cache/                       # Cached embeddings, entities, event summaries
+├── Dashboard/Outputfiles/       # Generated charts (radar plots, cluster scatter)
+├── scrape.py                    # Article content scraper
+├── ollama_annotate.py           # PEST annotation runner
+├── ollama_client.py             # LLM annotation logic and prompts
+├── article_to_event_level.py    # Full clustering pipeline
+├── regressor_jesse.py           # SVR regression model for PEST prediction
+├── streamlit_app.py             # Dashboard
+└── dataset.py                   # Data loading utilities
+```
+
+---
+
+## Notes
+
+- Ollama must be running locally before executing any annotation or description generation steps.
+- The `llama3.2:1b` model is used for both annotation and event description generation. Larger models will improve quality but increase runtime.
+- Articles flagged as `relevant: false` by the annotation step are excluded from clustering.
+- The `regressor_jesse.py` file trains an SVR model to predict PEST scores from embeddings, useful for applying scores to unannotated datasets.

@@ -13,7 +13,7 @@ from dataset import get_df
 from article_to_event_level import aggregate_pestle_per_event
 from article_to_event_level import OUTPUT_FILE, EVENT_SUMMARY_FILE
 
-LOAD_DESCRIPTIONS = False
+LOAD_DESCRIPTIONS = True
 
 # ── Config ────────────────────────────────────────────────────────
 DATA_FILE = OUTPUT_FILE

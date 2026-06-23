@@ -369,4 +369,3 @@ def main():
 if __name__ == "__main__":
     main()
 
-#python scrape.py --input data.xlsx --output new_dataset.json --type-filter News --type-match exact --english-only --target-count 1000
