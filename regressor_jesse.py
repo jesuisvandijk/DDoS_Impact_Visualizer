@@ -16,19 +16,19 @@ from sklearn.preprocessing import StandardScaler
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from article_to_event_level import embed_articles, add_entities_to_df
+from article_to_event_level import embed_articles, add_entities_to_df, DATA_FILE
 
 #-------------------------------------------------------------------------------#
 #-----------------------------SETTINGS------------------------------------------#
 #-------------------------------------------------------------------------------#
 
-DATA_FILE = 'Data/14-output-pest-1000.json'
+DATA_FILE = DATA_FILE
 FULL_DATA_FILE = 'Data/07-full-without-annotated-alerts.json'
 
 content_col = "Content"
 RANDOM_STATE = 25
 
-# Set to True to predict labels on the full unannotated dataset
+# Set to True to predict labels on the full unannotated dataset. Takes time
 run_on_full_df = False
 
 #-------------------------------------------------------------------------------#
@@ -41,7 +41,11 @@ def get_data(filepath, news_only=False):
     if news_only:
         df = df[df['Alert Type'] == 'News'].reset_index(drop=True)
 
-    # Drop rows where any PESTLE dimension is missing
+    if 'relevant' in df.columns:
+        before = len(df)
+        df = df[df['relevant'] == True].reset_index(drop=True)
+        print(f"  Dropped {before - len(df)} irrelevant (non-cyber) articles.")
+
     pestle_dims = ['Political', 'Economic', 'Social', 'Technological']
     before = len(df)
     df = df.dropna(subset=pestle_dims).reset_index(drop=True)

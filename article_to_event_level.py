@@ -10,8 +10,6 @@ import sys
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline as hf_pipeline
 from tqdm import tqdm
-from sklearn.metrics import pairwise_distances
-
 
 from ollama import Client
 import hdbscan
@@ -21,31 +19,43 @@ import umap
 nlp = spacy.load('en_core_web_sm')
 EMBEDDER = 'paraphrase-multilingual-MiniLM-L12-v2'
 # ─────────────────────────────────────────────────────────────────────────────
+# Data
+# ─────────────────────────────────────────────────────────────────────────────
+
+DATA_FILE       = 'Data/new-16-output-pest-1000.json'
+OUTPUT_FILE     = 'Data/09-event-clustered_new.json'
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Cached files - clear/delete when using a new dataset
+# ─────────────────────────────────────────────────────────────────────────────
+EMBEDDINGS_FILE = 'Cache/embeddings_new.npy'
+ENTITIES_FILE = 'Cache/entities_cache_new.json'
+EVENT_SUMMARY_FILE = 'Cache/event_summary.json'
+
+# ─────────────────────────────────────────────────────────────────────────────
 # Settings — adjust for dataset
 # ─────────────────────────────────────────────────────────────────────────────
 
-DATA_FILE       = 'Data/new-15-output-pest-1000.json'  # annotated training dataset
-EMBEDDINGS_FILE = 'Cache/embeddings_new.npy'  # cached embeddings
-OUTPUT_FILE     = 'Data/09-event-clustered_new.json'
-ENTITIES_FILE = 'Cache/entities_cache_new.json'
-
-# DBSCAN parameters — tune if clusters look wrong
-# eps (base = 0.5):   neighbourhood radius — lower = more clusters, higher = fewer
-# min_samples (base = 5): minimum articles to form a cluster
-#DBSCAN_EPS         = 0.5
-#DBSCAN_MIN_SAMPLES = 5
-
-HDBSCAN_MIN_CLUSTER_SIZE = 3   # minimum articles to form an event
+HDBSCAN_MIN_CLUSTER_SIZE = 4  # minimum articles to form an event
                                 # increase if too many tiny clusters
                                 # decrease if too much noise (-1)
-HDBSCAN_MIN_SAMPLES      = 3   # higher = more conservative, more noise
+HDBSCAN_MIN_SAMPLES      = 3 # higher = more conservative, more noise
 
-# UMAP parameters
-UMAP_N_NEIGHBORS = 8    # 5-50, lower = more local structure
-UMAP_MIN_DIST    = 0.05   # 0.0-0.5, lower = tighter clusters
+MAX_CLUSTER_SIZE = 50   # clusters larger than this get sub-clustered automatically
 
-#Toggle to generate the description for events, takes a very long time
-GENERATE_EVENT_DESCRIPTION = False
+SUB_MCS = 4             # min_cluster_size for sub-clustering
+SUB_MS  = 2             # min_samples for sub-clustering — kept low since we're already working in a filtered, dense sub-space
+
+UMAP_N_NEIGHBORS = 15    # 5-50, lower = more local structure
+UMAP_MIN_DIST    = 0.15   # 0.0-0.5, lower = tighter clusters
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Toggle descriptions, dashboard and graphs
+# ─────────────────────────────────────────────────────────────────────────────
+
+GENERATE_EVENT_DESCRIPTION = False #Toggle to generate the description for events, takes a very long time
+LAUNCH_DASH = True #Toggle to automatically launch dashboard
+SHOW_GRAPHS = False #Show all files in screen
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 1 — Named Entity Recognition
@@ -141,49 +151,83 @@ def reduce_dimensions(embeddings, n_components, random_state=42):
 # Stage 4 — Clustering (HDBSCAN)
 # ─────────────────────────────────────────────────────────────────────────────
 
-def build_combined_distance(reduced_embeddings, dates, date_weight=0.4, max_days=14):
-    sem_dist = pairwise_distances(reduced_embeddings, metric='cosine')
-    days = np.array([(d1 - d2).days for d1 in dates for d2 in dates]).reshape(len(dates), len(dates))
-    date_dist = np.clip(np.abs(days) / max_days, 0, 1)  # normalized 0-1, capped at max_days
-    combined = (1 - date_weight) * sem_dist + date_weight * date_dist
-    return combined
-
-def cluster_articles(combined_distance):
-    clusterer = hdbscan.HDBSCAN(
-        min_cluster_size=HDBSCAN_MIN_CLUSTER_SIZE,
-        min_samples=HDBSCAN_MIN_SAMPLES,
-        metric='precomputed',
-        cluster_selection_method='leaf'
-    )
-    return clusterer.fit_predict(combined_distance.astype('float64'))
-
-#def cluster_articles(reduced_embeddings):
-    """
-    Clusters articles into events using HDBSCAN.
-    Tune HDBSCAN_MIN_CLUSTER_SIZE at the top of this file:
-      - Too many tiny clusters  → increase HDBSCAN_MIN_CLUSTER_SIZE
-      - Everything is noise (-1) → decrease HDBSCAN_MIN_CLUSTER_SIZE
-      - Too few broad clusters  → decrease HDBSCAN_MIN_SAMPLES
-    """
+def cluster_articles(embeddings):
     clusterer = hdbscan.HDBSCAN(
         min_cluster_size=HDBSCAN_MIN_CLUSTER_SIZE,
         min_samples=HDBSCAN_MIN_SAMPLES,
         metric='cosine',
-        algorithm = 'generic'
+        algorithm='generic',
+        cluster_selection_method='eom'
     )
-    labels = clusterer.fit_predict(reduced_embeddings.astype('float64'))
-    return labels
+    return clusterer.fit_predict(embeddings.astype('float64'))
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Stage 4b — Automatic sub-clustering of oversized events
+# ─────────────────────────────────────────────────────────────────────────────
+
+def split_large_clusters(df, embeddings):
+    iteration = 0
+    while True:
+        iteration += 1
+        cluster_sizes = df[df['event_cluster'] != -1]['event_cluster'].value_counts()
+        large_clusters = cluster_sizes[cluster_sizes > MAX_CLUSTER_SIZE].index.tolist()
+
+        if not large_clusters:
+            print(f"  No clusters exceed size {MAX_CLUSTER_SIZE} — done after {iteration - 1} iteration(s).")
+            break
+
+        print(f"\n  Iteration {iteration}: {len(large_clusters)} oversized cluster(s): {large_clusters}")
+
+        for cluster_id in large_clusters:
+            mask    = df['event_cluster'] == cluster_id
+            indices = np.where(mask)[0]
+            sub_embeddings = embeddings[indices]
+
+            clusterer = hdbscan.HDBSCAN(
+                min_cluster_size=SUB_MCS,
+                min_samples=SUB_MS,
+                metric='cosine',
+                algorithm='generic',
+                cluster_selection_method='eom'
+            )
+            sub_labels = clusterer.fit_predict(sub_embeddings.astype('float64'))
+
+            n_sub   = len(set(sub_labels)) - (1 if -1 in sub_labels else 0)
+            n_noise = int(sum(sub_labels == -1))
+
+            if n_sub <= 1:
+                # Sub-clustering found no meaningful split — leave this cluster alone
+                print(f"    Cluster {cluster_id} ({len(indices)} articles): "
+                      f"could not be split further, leaving as-is.")
+                df.loc[mask, 'event_cluster'] = -(cluster_id + 2)
+                continue
+
+            max_existing = df['event_cluster'].max()
+            new_labels = np.where(
+                sub_labels == -1,
+                -1,
+                sub_labels + max_existing + 1
+            )
+            df.loc[mask, 'event_cluster'] = new_labels
+            print(f"    Cluster {cluster_id} ({len(indices)} articles) → "
+                  f"{n_sub} sub-events, {n_noise} pushed to noise.")
+
+    exempt_mask = df['event_cluster'] < -1
+    if exempt_mask.any():
+        exempt_ids = df.loc[exempt_mask, 'event_cluster'].unique()
+        max_id = df[df['event_cluster'] >= 0]['event_cluster'].max()
+        for old_id in exempt_ids:
+            max_id += 1
+            df.loc[df['event_cluster'] == old_id, 'event_cluster'] = max_id
+            print(f"  Restored exempt cluster {old_id} → {max_id}")
+    return df
+
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Stage 5 — Visualisation
 # ─────────────────────────────────────────────────────────────────────────────
 
 def plot_clusters(reduced_2d, labels, title='Article Event Clusters'):
-    """
-    Scatter plot of articles in 2D UMAP space, coloured by event cluster.
-    Noise articles (label -1) are shown in light grey.
-    Saved as event_clusters.png.
-    """
     fig, ax = plt.subplots(figsize=(14, 9))
     colors = plt.cm.tab20.colors
 
@@ -207,7 +251,8 @@ def plot_clusters(reduced_2d, labels, title='Article Event Clusters'):
     ax.set_ylabel('UMAP dimension 2')
     plt.tight_layout()
     plt.savefig('Dashboard/Outputfiles/event_clusters.png', format='png')
-#    plt.show()
+    if SHOW_GRAPHS:
+        plt.show()
     print("  Cluster plot saved to event_clusters.png")
 
 
@@ -216,12 +261,6 @@ def plot_clusters(reduced_2d, labels, title='Article Event Clusters'):
 # ─────────────────────────────────────────────────────────────────────────────
 
 def aggregate_pestle_per_event(df):
-    """
-    Groups articles by event cluster and computes mean PESTLE scores per event.
-    Only runs if PESTLE annotation columns are present in the dataframe.
-    Automatically creates a radar chart of the aggregated values
-    Returns a summary dataframe with one row per event.
-    """
     pestle_cols = [
         'Political', 'Economic', 'Social',
         'Technological'
@@ -245,7 +284,6 @@ def aggregate_pestle_per_event(df):
         .rename(columns={'Content': 'article_count'})
         .reset_index()
     )
-    # Compute the angle for each dimension on the circle
     angles = [n / num_col * 2 * np.pi for n in range(num_col)]
     angles += angles[:1]
 
@@ -271,8 +309,9 @@ def aggregate_pestle_per_event(df):
 
         plt.tight_layout()
         plt.savefig(f'Dashboard/Outputfiles/radar_event_{cluster_id}.png', format='png')
-#        plt.show()
-#        print(f"  Radar chart saved: radar_event_{cluster_id}.png")
+        if SHOW_GRAPHS:
+            plt.show()
+            print(f"  Radar chart saved: radar_event_{cluster_id}.png")
     return event_summary
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -317,8 +356,11 @@ def run_pipeline():
     # ── Step 1: Load ─────────────────────────────────────────────────────────
     print("\nStep 1: Loading data...")
     df = dataset.get_df(DATA_FILE)
-    df = df.drop_duplicates(subset='Content').reset_index(drop=True)
     df = df[df['Alert Type'] == 'News'].reset_index(drop=True)
+    if 'relevant' in df.columns:
+        before = len(df)
+        df = df[df['relevant'] == True].reset_index(drop=True)
+        print(f"  Dropped {before - len(df)} non-cyber articles before clustering.")
     print(f"  {len(df)} news articles loaded from {DATA_FILE}.")
 
 
@@ -327,7 +369,7 @@ def run_pipeline():
     df = add_entities_to_df(df)
     print(f"  Done")
 
-    # ── Step 3: Embed ─────────────────────────────────────────────────────────
+    # ── Step 3: Embed articles ────────────────────────────────────────────────
     print("\nStep 3: Embedding articles...")
     embeddings = None
     if os.path.exists(EMBEDDINGS_FILE):
@@ -345,53 +387,60 @@ def run_pipeline():
 
     print(f"  Embedding shape: {embeddings.shape}")
 
-
-    # ── Step 4: Reduce dimensions ─────────────────────────────────────────────
-    print("\nStep 4: Reducing dimensions with UMAP...")
-    print("  Computing 10D reduction for clustering...")
-    reduced_10d = reduce_dimensions(embeddings, n_components=10)
-    print("  Computing 2D reduction for visualisation...")
-    reduced_2d  = reduce_dimensions(embeddings, n_components=2)
-
-    # ── Step 5: Cluster ───────────────────────────────────────────────────────
-    print("\nStep 5: Clustering articles into events (HDBSCAN)...")
-    dates = pd.to_datetime(df['Date'], errors='coerce')  # adjust column name if yours differs
-    combined_distance = build_combined_distance(reduced_10d, dates)
-    labels = cluster_articles(combined_distance)
-
+    # ── Step 4: Cluster ───────────────────────────────────────────────────────
+    print("\nStep 4: Clustering articles into events (HDBSCAN)...")
+    labels = cluster_articles(embeddings)
     df['event_cluster'] = labels
-    n_events = len(set(labels)) - (1 if -1 in labels else 0)
-    n_noise  = int(sum(labels == -1))
-    print(f"  Events found:   {n_events}")
-    print(f"  Noise articles: {n_noise} ({round(n_noise / len(df) * 100, 1)}%)")
-    print(f"  Tip: adjust HDBSCAN_EPS at the top of this file if results look wrong.")
 
-    # ── Step 6: Visualise ─────────────────────────────────────────────────────
-    print("\nStep 6: Visualising clusters...")
+    # ── Step 4b: Split oversized clusters ────────────────────────────────────
+    print("\nStep 4b: Splitting oversized clusters...")
+    df = split_large_clusters(df, embeddings)
+
+    # Recompute labels and stats after splitting
+    labels = df['event_cluster'].values
+    n_events = len(set(labels)) - (1 if -1 in labels else 0)
+    n_noise = int(sum(labels == -1))
+    print(f"\n  Final: {n_events} events, "
+          f"{n_noise} noise articles ({round(n_noise / len(df) * 100, 1)}%)")
+
+    # ── Step 5: Visualise ─────────────────────────────────────────────────────
+    print("\nStep 5: Visualising clusters...")
+    reduced_2d = reduce_dimensions(embeddings, n_components=2)  # 2D for plot only
     plot_clusters(reduced_2d, labels)
 
-    # ── Step 7: PESTLE aggregation ────────────────────────────────────────────
+    # ── Step 6: PESTLE aggregation ────────────────────────────────────────────
     print("\nStep 7: Aggregating PESTLE scores per event...")
     event_summary = aggregate_pestle_per_event(df)
 
     if GENERATE_EVENT_DESCRIPTION:
         print("\nGenerating event summary... ")
         event_summary = generate_description(event_summary, df)
-
-    from streamlit_app import EVENT_SUMMARY_FILE
+    else:
+        if event_summary is not None and os.path.exists(EVENT_SUMMARY_FILE):
+            try:
+                old_summary = pd.read_json(EVENT_SUMMARY_FILE)
+                if 'description' in old_summary.columns:
+                    event_summary = event_summary.merge(
+                        old_summary[['event_cluster', 'description']],
+                        on='event_cluster', how='left'
+                    )
+                    print("  Reused existing descriptions from previous run.")
+            except Exception as e:
+                print(f"  Could not load previous descriptions: {e}")
 
     if event_summary is not None:
         event_summary.to_json(EVENT_SUMMARY_FILE, orient='columns')
         print(f"  Event summary (with descriptions) saved to {EVENT_SUMMARY_FILE}")
         print(event_summary.to_string(index=False))
 
-    # ── Step 8: open streamlit  ────────────────────────────────────────────────
-    print("\nLaunching dashboard...")
-    subprocess.Popen(
-        [sys.executable, "-m", "streamlit", "run", "streamlit_app.py"],
-        stdout=subprocess.DEVNULL,
-        stderr=subprocess.DEVNULL
-    )
+    # ── Step 7: open streamlit  ────────────────────────────────────────────────
+    if LAUNCH_DASH:
+        print("\nLaunching dashboard...")
+        subprocess.Popen(
+            [sys.executable, "-m", "streamlit", "run", "streamlit_app.py"],
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
 
     # ── Save ──────────────────────────────────────────────────────────────────
     df_save = df.drop(columns=['entities'], errors='ignore')

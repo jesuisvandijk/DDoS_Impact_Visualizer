@@ -11,12 +11,14 @@ from sklearn.metrics.pairwise import cosine_similarity
 
 from dataset import get_df
 from article_to_event_level import aggregate_pestle_per_event
-from article_to_event_level import OUTPUT_FILE
+from article_to_event_level import OUTPUT_FILE, EVENT_SUMMARY_FILE
+
+LOAD_DESCRIPTIONS = False
 
 # ── Config ────────────────────────────────────────────────────────
 DATA_FILE = OUTPUT_FILE
 PESTLE_DIMS = ['Political', 'Economic', 'Social', 'Technological']
-EVENT_SUMMARY_FILE = 'Cache/event_summary.json'
+
 
 # ── Load data (cached so it only runs once) ───────────────────────
 @st.cache_data
@@ -130,8 +132,10 @@ else:
         # Event description
         with st.spinner("Generating..."):
             st.write("test")
-            #description = event_summary[event_summary["event_cluster"] == event_id]["description"].iloc[0]
-            #st.write(description)
+            if LOAD_DESCRIPTIONS:
+                description = event_summary[event_summary["event_cluster"] == event_id]["description"].iloc[0]
+                st.write(description)
+
 
     st.markdown("""
     **SCALE:**  
@@ -183,7 +187,10 @@ with st.sidebar:
     for _, row in filtered_summary.iterrows():
         event_id = int(row["event_cluster"])
         st.write(f"Event {event_id} — {int(row['article_count'])} articles")
-        #st.caption(row["description"][:150] + "...")
+
+        if LOAD_DESCRIPTIONS:
+            st.caption(row["description"][:150] + "...")
+
         if st.button(f"View event {event_id} →", key=f"btn_{event_id}"):
             st.session_state.selected_event = event_id
             st.rerun()

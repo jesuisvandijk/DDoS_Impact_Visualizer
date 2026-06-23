@@ -1,21 +1,28 @@
 import json
+import re
 from ollama import Client
 
 # PESTLE dimensions (excluding Legal and Environmental)
 DIMENSIONS = ["Political", "Economic", "Social", "Technological"]
 
 SYSTEM_PROMPT = """You are an expert analyst specializing in cybersecurity impact assessment.
-You will read a news article (title + body) and independently score it on four dimensions.
+You will read a news article (title + body) and perform two steps.
 
 ---
-SCORING SCALE:
+STEP 1 — RELEVANCE CHECK
+Determine whether the article is substantively about a cybersecurity incident, cyber attack,
+DDoS event, data breach, or directly related cyber threat activity.
+
+Articles that are NOT relevant include (non-exhaustive): general IT/business news with no
+attack or threat content, product announcements, unrelated political/economic news, sports,
+entertainment, or any article where cybersecurity is not a real subject of the text.
+
+---
+STEP 2 — SCORING SCALE (only if relevant)
 0 = No meaningful content relating to this dimension
 1 = Minor or indirect mention (topic is peripheral)
 2 = Moderate coverage (topic is discussed but not the main focus)
 3 = Primary focus (topic is central to the article)
-
-Treat each dimension as INDEPENDENT. A score on one must not influence another.
-Use the full range 0–3. Do not default to middle values.
 
 ---
 DIMENSIONS:
@@ -60,15 +67,29 @@ inoperability; socio-technical sophistication.
   3 – Article provides in-depth technical analysis, covers novel TTPs, or reports full
       infrastructure inoperability.
 
----
 INSTRUCTIONS:
-- Base your scores on the article content only. Do not infer beyond what is written.
+- Base your decision and scores on the article content only. Do not infer beyond what is written.
+- When uncertain whether an article is relevant, prefer marking it NOT relevant (false negative)
+  over scoring an off-topic article (false positive). Precision matters more than recall here.
+- IMPORTANT: null is ONLY used when "relevant" is false, and ONLY for all four dimensions at once.
+- If "relevant" is true, you MUST give every single dimension an integer score (0, 1, 2, or 3).
+  A dimension having NO content is a score of 0 — it is NEVER null. Do not output null or None for a
+  dimension just because that dimension isn't discussed in the article; output 0 instead.
 - Weight sustained, substantive coverage more than passing mentions.
 - If the title contradicts the body, follow the body.
 - Score each dimension independently before combining into the final JSON.
 
+Respond ONLY with a valid JSON object, and the STOP. No explanation, no markdown, no extra text.
+
+Valid examples (these are format examples only, not real scores):
+{"relevant": false, "Political": null, "Economic": null, "Social": null, "Technological": null}
+{"relevant": true, "Political": 0, "Economic": 2, "Social": 0, "Technological": 3}
+
+INVALID — never do this:
+{"relevant": true, "Political": null, "Economic": 1, "Social": 0, "Technological": 2}
+
 Respond ONLY with a valid JSON object. No explanation, no markdown, no extra text:
-{"Political": <0-3>, "Economic": <0-3>, "Social": <0-3>, "Technological": <0-3>}"""
+{"relevant":<true/false>, "Political": <0-3>, "Economic": <0-3>, "Social": <0-3>, "Technological": <0-3>}"""
 
 
 def build_prompt(article: dict) -> str:
@@ -91,32 +112,68 @@ def has_content(article: dict) -> bool:
     )
 
 
+
+def extract_json_object(raw: str) -> dict:
+    """Extract the first top-level JSON object from a string, ignoring any
+    trailing explanation text the model adds despite instructions not to."""
+    # Fast path: maybe it's already clean
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        pass
+
+    # Find the first balanced {...} block
+    start = raw.find("{")
+    if start == -1:
+        raise json.JSONDecodeError("No JSON object found", raw, 0)
+
+    depth = 0
+    for i, ch in enumerate(raw[start:], start):
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return json.loads(raw[start:i + 1])
+
+    raise json.JSONDecodeError("No balanced JSON object found", raw, start)
+
+
 def annotate_article(client: Client, article: dict, model: str) -> dict:
     response = client.chat(
         model=model,
         messages=[
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user",   "content": build_prompt(article)}
-        ],
-        format = "json",
-        options = {"temperature": 0, "num_predict": 60}
+        ]
     )
 
     raw = response.message.content.strip()
 
     try:
-        scores = json.loads(raw)
-        for dim in DIMENSIONS:
-            if dim not in scores:
-                raise ValueError(f"Missing dimension: {dim}")
-            if scores[dim] not in (0, 1, 2, 3):
-                raise ValueError(f"Invalid score for {dim}: {scores[dim]}")
-        return scores
+        result = extract_json_object(raw)
+        if "relevant" not in result:
+            raise ValueError("Missing 'relevant' field")
+
+        if result["relevant"] is False:
+            return {"relevant": False, **{dim: None for dim in DIMENSIONS}}
+
+        if result["relevant"] is True:
+            scores = {}
+            for dim in DIMENSIONS:
+                val = result.get(dim)
+                if val is None:
+                    val = 0  # per-field null while relevant=true means "no content" → 0
+                if val not in (0, 1, 2, 3):
+                    raise ValueError(f"Invalid score for {dim}: {val}")
+                scores[dim] = val
+            return {"relevant": True, **scores}
+
+        raise ValueError(f"Unexpected 'relevant' value: {result['relevant']!r}")
 
     except (json.JSONDecodeError, ValueError) as e:
         print(f"[Warning] Could not parse response: {e}\nRaw output: {raw}")
-        return {dim: None for dim in DIMENSIONS}
-
+        return {"relevant": None, **{dim: None for dim in DIMENSIONS}}
 
 def annotate_dataset(
     input_path: str,
