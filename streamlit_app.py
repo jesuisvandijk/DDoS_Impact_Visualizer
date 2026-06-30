@@ -1,9 +1,5 @@
 import streamlit as st
 import pandas as pd
-import numpy as np
-import plotly.graph_objects as go
-import json
-from ollama import Client
 import os
 
 from sentence_transformers import SentenceTransformer
@@ -131,7 +127,6 @@ else:
     with col2:
         # Event description
         with st.spinner("Generating..."):
-            st.write("test")
             if LOAD_DESCRIPTIONS:
                 description = event_summary[event_summary["event_cluster"] == event_id]["description"].iloc[0]
                 st.write(description)
