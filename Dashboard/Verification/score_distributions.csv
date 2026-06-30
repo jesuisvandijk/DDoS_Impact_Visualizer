@@ -1,0 +1,17 @@
+Dimension,Score,Count,Percentage
+Political,0,569,66.2
+Political,1,16,1.9
+Political,2,223,25.9
+Political,3,52,6.0
+Economic,0,549,63.8
+Economic,1,79,9.2
+Economic,2,162,18.8
+Economic,3,70,8.1
+Social,0,637,74.1
+Social,1,136,15.8
+Social,2,61,7.1
+Social,3,26,3.0
+Technological,0,184,21.4
+Technological,1,49,5.7
+Technological,2,162,18.8
+Technological,3,465,54.1

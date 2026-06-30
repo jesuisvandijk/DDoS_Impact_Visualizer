@@ -1,12 +1,11 @@
 import dataset
-from time import time
 import numpy as np
 import pandas as pd
 
 from sklearn.pipeline import make_pipeline
-from sklearn.model_selection import StratifiedKFold
+from sklearn.model_selection import StratifiedKFold, GridSearchCV
 
-from sklearn.metrics import confusion_matrix, mean_absolute_error, mean_squared_error, r2_score
+from sklearn.metrics import confusion_matrix, mean_absolute_error, mean_squared_error
 from scipy.stats import spearmanr
 from sklearn.utils.class_weight import compute_sample_weight
 
@@ -78,30 +77,73 @@ def create_confusion_plot(features, labels, dimension_name):
     print('\n' + pipeline_name)
     last_alg_name = pipeline.steps[-1][0]
 
-    skf = StratifiedKFold(n_splits=3, random_state=56, shuffle=True)
+    skf = StratifiedKFold(n_splits=5, random_state=RANDOM_STATE, shuffle=True)
     test_lab = []
     pred_lab = []
     maes = []
+
+    param_grid = {
+        'svr__C':       [0.1, 1, 10, 100],
+        'svr__epsilon': [0.05, 0.1, 0.2, 0.5],
+        'svr__kernel':  ['rbf', 'linear']
+    }
 
     count = 1
     for train_index, test_index in skf.split(features, labels):
         print('Processing fold:', count)
 
         features_train = pd.DataFrame(features).iloc[train_index]
-        features_test = pd.DataFrame(features).iloc[test_index]
+        features_test  = pd.DataFrame(features).iloc[test_index]
 
         labels_train = pd.DataFrame(labels).iloc[train_index].values.ravel()
-        labels_test = pd.DataFrame(labels).iloc[test_index].values.ravel()
+        labels_test  = pd.DataFrame(labels).iloc[test_index].values.ravel()
 
+        best_mae = float('inf')
+        best_params = None
+        best_estimator = None
 
-        sample_weights = compute_sample_weight('balanced', labels_train)
-        pipeline.fit(features_train, labels_train, svr__sample_weight=sample_weights)
-        y_pred = np.clip(np.round(pipeline.predict(features_test)), 0, 3).astype(int)
+        for C in [0.1, 1, 10, 100]:
+            for epsilon in [0.05, 0.1, 0.2, 0.5]:
+                for kernel in ['rbf']:
+                    inner_cv = StratifiedKFold(n_splits=3, random_state=RANDOM_STATE, shuffle=True)
+                    fold_maes = []
+
+                    for inner_train, inner_val in inner_cv.split(features_train, labels_train):
+                        X_tr = pd.DataFrame(features_train).iloc[inner_train]
+                        X_val = pd.DataFrame(features_train).iloc[inner_val]
+                        y_tr = pd.DataFrame(labels_train).iloc[inner_train].values.ravel()
+                        y_val = pd.DataFrame(labels_train).iloc[inner_val].values.ravel()
+
+                        sw = compute_sample_weight('balanced', y_tr)
+
+                        pipe = make_pipeline(StandardScaler(), SVR(kernel=kernel, C=C, epsilon=epsilon))
+                        pipe.fit(X_tr, y_tr, svr__sample_weight=sw)
+
+                        y_val_pred = np.clip(np.round(pipe.predict(X_val)), 0, 3).astype(int)
+                        fold_maes.append(mean_absolute_error(y_val, y_val_pred))
+
+                    mean_mae = np.mean(fold_maes)
+                    print(f"    C={C}, epsilon={epsilon}, kernel={kernel} -> MAE={mean_mae:.3f}")
+
+                    if mean_mae < best_mae:
+                        best_mae = mean_mae
+                        best_params = {'C': C, 'epsilon': epsilon, 'kernel': kernel}
+                        best_estimator = make_pipeline(
+                            StandardScaler(),
+                            SVR(kernel=kernel, C=C, epsilon=epsilon)
+                        )
+
+        print(f"  Best params fold {count}: {best_params}")
+
+        # Refit best estimator on full training fold
+        sw_full = compute_sample_weight('balanced', labels_train)
+        best_estimator.fit(features_train, labels_train, svr__sample_weight=sw_full)
+
+        y_pred = np.clip(np.round(best_estimator.predict(features_test)), 0, 3).astype(int)
 
         mae = mean_absolute_error(labels_test, y_pred)
         maes.append(mae)
-
-        print(f"MAE fold {count}: {mae:.3f}")
+        print(f"  MAE fold {count}: {mae:.3f}")
 
         test_lab.append(labels_test)
         pred_lab.append(y_pred)
@@ -110,27 +152,25 @@ def create_confusion_plot(features, labels, dimension_name):
     test_lab_final = np.concatenate(test_lab)
     pred_lab_final = np.concatenate(pred_lab)
 
-    rmse = np.sqrt(mean_squared_error(test_lab_final, pred_lab_final))
-    r2 = r2_score(test_lab_final, pred_lab_final)
+    rmse    = np.sqrt(mean_squared_error(test_lab_final, pred_lab_final))
     spearman, _ = spearmanr(test_lab_final, pred_lab_final)
-
-    score_levels = sorted(np.unique(test_lab_final))
 
     print('\nFULL REPORT')
     print(f"  MAE      : {np.mean(maes):.3f}  (std: {np.std(maes):.3f})")
     print(f"  RMSE     : {rmse:.3f}")
     print(f"  Spearman : {spearman:.3f}")
 
+    # Confusion matrix — unchanged from your original
+    score_levels = sorted(np.unique(test_lab_final))
     conf_mat = confusion_matrix(test_lab_final, pred_lab_final, labels=score_levels)
     sns.heatmap(conf_mat, annot=True, fmt='d',
                 xticklabels=[f'Pred {s}' for s in score_levels],
                 yticklabels=[f'True {s}' for s in score_levels])
     plt.ylabel('Actual')
     plt.xlabel('Predicted')
-    plt.title(str(last_alg_name +" " + dimension_name))
+    plt.title(str(last_alg_name + " " + dimension_name))
     plt.tight_layout()
     plt.savefig(f'Dashboard/Outputfiles/confusion_{dimension_name}.pdf', format='pdf')
-#    plt.show()
     plt.close()
 
 
