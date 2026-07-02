@@ -1,0 +1,542 @@
+[
+  {
+    "identifier": "https://www.ilsole24ore.com/art/attacchi-cyber-italia-russia-reazione-visita-premier-kiev-AEP2mlrC",
+    "Content_Title": null,
+    "Date": "2023-02-22 00:00:00",
+    "Link": "https://www.ilsole24ore.com/art/attacchi-cyber-italia-russia-reazione-visita-premier-kiev-AEP2mlrC",
+    "dimensions": {
+      "Political": {
+        "score": 3,
+        "agrees_with_score": false,
+        "justification": "The article does not mention Meloni's visit to Kiev in any context related to Italy's political situation.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not mention any economic impact on Italy, such as loss of revenue, job losses, or damage to infrastructure. The focus is entirely on a cyber attack against Italian government and private sector websites, with no discussion of its potential financial consequences.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not mention any social issues such as discrimination, inequality, or social injustice.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 3,
+        "agrees_with_score": false,
+        "justification": "The article does not provide any evidence of a technological attack on Italian sites, but rather reports on an incident where some websites were taken offline due to Distributed Denial of Service (DDoS) attacks.",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://asia.nikkei.com/Politics/Defense/Quad-countries-to-bolster-cyber-defense-with-information-sharing",
+    "Content_Title": null,
+    "Date": "2023-04-25 00:00:00",
+    "Link": "https://asia.nikkei.com/Politics/Defense/Quad-countries-to-bolster-cyber-defense-with-information-sharing",
+    "dimensions": {
+      "Political": {
+        "score": 3,
+        "agrees_with_score": true,
+        "justification": "The article mentions that Russia's invasion of Ukraine has made stronger cyber defense an urgent priority in deterring both it and China.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article mentions that the U.S., Australia, India, and Japan aim for an agreement by May summit, which suggests a high level of cooperation on economic matters.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article mentions that Russia's invasion of Ukraine has made stronger cyber defense an urgent priority in deterring both it and China.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article mentions that the U.S., Australia, India, and Japan are working together on how to coordinate the sharing of information on cyberattacks targeting critical infrastructure facilities, but it does not provide any specific details about their technological capabilities or strategies. The focus is more on cooperation and preparation rather than discussing new technologies themselves.",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://www.healthcareitnews.com/news/cisos-face-budgetary-pressures-burnout-during-global-recession",
+    "Content_Title": null,
+    "Date": "2023-05-10 00:00:00",
+    "Link": "https://www.healthcareitnews.com/news/cisos-face-budgetary-pressures-burnout-during-global-recession",
+    "dimensions": {
+      "Political": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not mention any political implications or consequences of these cyber threats.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 2,
+        "agrees_with_score": true,
+        "justification": "The article discusses various economic impacts of cybersecurity threats, such as distributed denial of service (DDoS) attacks, supply chain attacks, ransomware attacks, smishing and vishing, and malware.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not mention social issues such as discrimination, inequality, or social injustice.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 0,
+        "agrees_with_score": true,
+        "justification": "The article discusses various technological threats in healthcare IT, such as distributed denial of service (DDoS) attacks, supply chain attacks, ransomware attacks, smishing and vishing, and malware. These are all examples of technological vulnerabilities that CISOs face.",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://www.eluniverso.com/noticias/internacional/la-pagina-web-del-parlamento-europeo-fue-victima-de-un-ciberataque-tras-voto-sobre-rusia-nota/",
+    "Content_Title": null,
+    "Date": "2022-11-24 00:00:00",
+    "Link": "https://www.eluniverso.com/noticias/internacional/la-pagina-web-del-parlamento-europeo-fue-victima-de-un-ciberataque-tras-voto-sobre-rusia-nota/",
+    "dimensions": {
+      "Political": {
+        "score": 2,
+        "agrees_with_score": false,
+        "justification": "The article mentions that the Parlamento Europeo presidenta declared Russia a State 'promotor del terrorismo', but does not provide any evidence of this declaration being made in real-time or with specific details about the event.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article mentions that the system of the Parlamento Europeo is under a 'sofisticado ciberataque', but it does not provide any evidence that this attack was related to the declaration by the Parliament as an 'Estado promotor del terrorismo'. The article also quotes Roberta Metsola's response, which includes the phrase ",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article mentions that the Parlamento Europeo presidenta declared Russia a State 'promotor del terrorismo', but does not provide any evidence of this declaration being made in real-time or with specific details about the event.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 3,
+        "agrees_with_score": false,
+        "justification": "The article mentions that the system of the Parlamento Europeo is under a 'sofisticado ciberataque', but does not provide any specific details about the nature or extent of this attack.",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://www.cyberkendra.com/2023/05/8-types-of-cyber-attacks-you-should.html",
+    "Content_Title": null,
+    "Date": "2023-05-06 00:00:00",
+    "Link": "https://www.cyberkendra.com/2023/05/8-types-of-cyber-attacks-you-should.html",
+    "dimensions": {
+      "Political": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not provide any meaningful content relating to the political dimension.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not provide any direct evidence relating to economic impacts of phishing attacks, but it mentions that these assaults can result in financial and operational damage to online firms. However, it also notes that distributed denial-of-service (DDoS) attacks are more likely to cause such damage. The article primarily focuses on the prevention and protection measures against cyber threats rather than discussing their economic implications. Therefore, I set this score to 0.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not provide any direct evidence from the text to support a score of 0 for the Social dimension. However, it mentions phishing attacks as one of the types of cybercrime, which is related to social engineering. The article also discusses the importance of staying informed about the latest threats and taking a proactive approach to digital security, which could be seen as promoting awareness and education on social issues. Therefore, I would argue that this score does not match the article.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 3,
+        "agrees_with_score": false,
+        "justification": "The score of 3 seems too high considering the content of the article. The article discusses various types of cyber threats and provides recommendations on how to protect against them, but it does not provide any specific examples or evidence from the article that would justify a score of 3. For instance, there is no mention of phishing attacks being particularly common in certain industries or regions, nor are there any statistics provided about the prevalence of these types of cyber threats. Additionally, the article provides general advice on how to protect against various types of cyber threats, but it does not provide specific guidance on how to implement those recommendations. Therefore, I would challenge the score of 3.",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://cybernews.com/news/ddos-for-hire-uk-police-sting-operation/",
+    "Content_Title": null,
+    "Date": "2023-03-29 00:00:00",
+    "Link": "https://cybernews.com/news/ddos-for-hire-uk-police-sting-operation/",
+    "dimensions": {
+      "Political": {
+        "score": 0,
+        "agrees_with_score": true,
+        "justification": "The article does not provide any direct evidence that Eric Trump's claims of rigged UFC event texts being AI deepfakes are true.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": true,
+        "justification": "The article does not mention Eric Trump's claims that rigged UFC event texts were actually AI deepfakes at all. Instead, it reports on a cyberattack hitting four major Iranian banks and China slamming US moves to blacklist Chinese tech firms. There is no evidence of any connection between the two topics.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 3,
+        "agrees_with_score": true,
+        "justification": "The article mentions AI deepfakes in the context of Eric Trump's claims that UFC event texts were actually AI-generated messages seeking insider information from commentator Daniel Cormier.\n",
+        "evidence_quote": "Eric Trump has claimed that X messages containing conversations seeking insider information from UFC event commentator Daniel Cormier are actually AI deepfakes",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://www.crn.com/news/channel-news/dartpoints-nabs-venyu-s-secure-data-centers-in-private-equity-backed-expansion",
+    "Content_Title": null,
+    "Date": "2023-05-04 00:00:00",
+    "Link": "https://www.crn.com/news/channel-news/dartpoints-nabs-venyu-s-secure-data-centers-in-private-equity-backed-expansion",
+    "dimensions": {
+      "Political": {
+        "score": 2,
+        "agrees_with_score": false,
+        "justification": "The article mentions that Venyu's facilities have always been top-notch, with staff and support being wonderful, and an account manager checking in on them. This suggests a strong relationship between DartPoints and Venyu, which is beneficial for political stability and cooperation.",
+        "evidence_quote": "“Being in South Louisiana’s Hurricane Alley, we needed to ensure the critical services we run for clients had minimal downtime, even during a disaster. Venyu was a great fit for us as they had a Tier 3 data center within our footprint.”",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 3,
+        "agrees_with_score": true,
+        "justification": "The article mentions that Venyu's facilities have always been top-notch, with staff and support being wonderful, and an account manager checking in on them. This suggests a high level of quality and reliability in the data centers, which is beneficial for economic growth.",
+        "evidence_quote": "“Being in South Louisiana’s Hurricane Alley, we needed to ensure the critical services we run for clients had minimal downtime, even during a disaster. Venyu was a great fit for us as they had a Tier 3 data center within our footprint.”",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 1,
+        "agrees_with_score": true,
+        "justification": "The article mentions that Venyu's facilities have always been top-notch, with staff and support being wonderful, and an account manager checking in on them. This suggests a positive social dynamic between DartPoints and Venyu.",
+        "evidence_quote": "“Being in South Louisiana’s Hurricane Alley, we needed to ensure the critical services we run for clients had minimal downtime, even during a disaster. Venyu was a great fit for us as they had a Tier 3 data center within our footprint.”",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 3,
+        "agrees_with_score": true,
+        "justification": "The article mentions that Venyu specializes in providing secure data centers, which is a key aspect of technological innovation. The fact that DartPoints acquired Venyu and now has three data centers with over 325,000 square feet of space indicates significant investment in this area. Additionally, the article highlights Venyu's Tier 3 data center within DartPoints' footprint, emphasizing its reliability and security. This suggests that DartPoints is actively investing in technological advancements to support its customers.",
+        "evidence_quote": "They offer the full breadth and portfolio and capability of the major operators,",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://www.investegate.co.uk/corero-network-sec.--cns-/rns/director-shareholding/202304261825006060X/",
+    "Content_Title": null,
+    "Date": "2023-04-27 00:00:00",
+    "Link": "https://www.investegate.co.uk/corero-network-sec.--cns-/rns/director-shareholding/202304261825006060X/",
+    "dimensions": {
+      "Political": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The mention of a specific company, Corero Network Sec. (CNS), and its shareholding in InvestEgate is not indicative of any political content.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article mentions that both Service and Hosting providers are involved in eliminating DDoS threats, but it does not provide any specific details on how they plan to do so.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not mention social media platforms or online communities directly.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 2,
+        "agrees_with_score": true,
+        "justification": "The article mentions that both service and hosting providers are involved in eliminating DDoS threats.",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://www.bnr.nl/nieuws/internationaal/10495313/cyberaanval-op-europees-parlement-mag-eigenlijk-niet-gebeuren",
+    "Content_Title": null,
+    "Date": "2022-11-24 00:00:00",
+    "Link": "https://www.bnr.nl/nieuws/internationaal/10495313/cyberaanval-op-europees-parlement-mag-eigenlijk-niet-gebeuren",
+    "dimensions": {
+      "Political": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not mention any political implications of the cyberattack on the European Parliament.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article mentions that the website of the European Parliament was a 'slachtoffer' of a DDoS attack by Killnet, but it does not provide any information about the economic impact or consequences of such an attack.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not mention any social implications of the cyberattack on the European Parliament's website.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 2,
+        "agrees_with_score": false,
+        "justification": "The article mentions a DDoS (Distributed Denial of Service) attack on the European Parliament's website, but it does not provide any technical details about the attack or its impact.",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://daijiworld.com/news/newsDisplay%3FnewsID%3D1078359",
+    "Content_Title": null,
+    "Date": "2023-05-10 00:00:00",
+    "Link": "https://daijiworld.com/news/newsDisplay%3FnewsID%3D1078359",
+    "dimensions": {
+      "Political": {
+        "score": 2,
+        "agrees_with_score": false,
+        "justification": "The article mentions that over 500mn cyberattacks were blocked in India in Q1 2023, which suggests a significant impact on political stability and security. However, it does not provide any specific information about the government's response to these attacks or their potential consequences for politics.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 3,
+        "agrees_with_score": false,
+        "justification": "The article mentions that over 500mn cyberattacks were blocked in India in Q1 2023, which is a significant economic impact.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article mentions that over 500mn cyberattacks blocked in India in Q1 2023, which is a significant social impact. However, it does not provide any specific information about targeted industries or companies being affected by these attacks.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 1,
+        "agrees_with_score": false,
+        "justification": "The article mentions cyberattacks blocked in India in Q1 2023 as a whole, but does not specifically discuss technological advancements or innovations.",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "http://mundociruja.com/ataques-distribuidos-de-denegacion-de-servicio-ddos-servicios-de-proteccion-de-la-tamano-del-mercado-tendencia-2032/",
+    "Content_Title": null,
+    "Date": "2023-02-20 00:00:00",
+    "Link": "http://mundociruja.com/ataques-distribuidos-de-denegacion-de-servicio-ddos-servicios-de-proteccion-de-la-tamano-del-mercado-tendencia-2032/",
+    "dimensions": {
+      "Political": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "No evidence of political content",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "No economic content is provided in the article.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "No evidence of social impact",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 0,
+        "agrees_with_score": true,
+        "justification": "No evidence of technological impact",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://www.telemundowashingtondc.com/noticias/mundo/realizan-ciberataque-prorruso-sitio-web-parlamento-europeo/2164866/",
+    "Content_Title": null,
+    "Date": "2022-11-24 00:00:00",
+    "Link": "https://www.telemundowashingtondc.com/noticias/mundo/realizan-ciberataque-prorruso-sitio-web-parlamento-europeo/2164866/",
+    "dimensions": {
+      "Political": {
+        "score": 2,
+        "agrees_with_score": false,
+        "justification": "The article mentions that a group prorruso (supporter of the right) hacked into the Parlamento Europeo site only hours after the legislators supported a resolution designating Russia as State patron of terrorism.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article mentions that the hack occurred 'después de que proclamamos a Rusia como Estado patrocinador del terrorismo', which implies that the economic impact of the attack is related to the political decision made by the EU. However, there is no direct mention of how this decision affected the economy or any specific economic consequences. The article primarily focuses on the political aspect and the use of DDoS attacks as a means to distract from more serious hacking incidents.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article mentions that a group pro-Kremlin attributed responsibility to the hackers, but does not provide any evidence of their involvement in the attack.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 3,
+        "agrees_with_score": false,
+        "justification": "The article mentions that the site of the European Parliament was hacked by a group pro-ruso only hours after the legislators supported a resolution designating Russia as State sponsor of terrorism.",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://www.morningstar.com/news/marketwatch/20230421245/pro-russian-hackers-stage-attack-against-europes-air-traffic-control-agency",
+    "Content_Title": null,
+    "Date": "2023-04-22 00:00:00",
+    "Link": "https://www.morningstar.com/news/marketwatch/20230421245/pro-russian-hackers-stage-attack-against-europes-air-traffic-control-agency",
+    "dimensions": {
+      "Political": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "No clear indication of political content",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 1,
+        "agrees_with_score": false,
+        "justification": "No clear indication of economic impact",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 2,
+        "agrees_with_score": false,
+        "justification": "There is no direct quote from a social actor (e.g., individual, group) about their actions or motivations.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 3,
+        "agrees_with_score": false,
+        "justification": "No clear evidence that the article discusses technological impacts",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://www.tech-critter.com/a10-networks-global-csp-research-report/",
+    "Content_Title": null,
+    "Date": "2023-05-10 00:00:00",
+    "Link": "https://www.tech-critter.com/a10-networks-global-csp-research-report/",
+    "dimensions": {
+      "Political": {
+        "score": 0,
+        "agrees_with_score": true,
+        "justification": "The article discusses how Communication Service Providers (CSPs) react and evolve in response to different client needs alongside the evolution of various technologies, which is a key aspect of political dynamics.",
+        "evidence_quote": "One of the key areas focused on by CSPs is enlarging service areas to cover the unserved or underserved communities through deploying secured connectivity with 69% of respondents giving the greenlight...",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not provide any direct evidence of significant economic growth or investments in communication service providers (CSPs). The focus is on market trends and client needs rather than financial metrics.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": true,
+        "justification": "The article discusses how Communication Service Providers (CSPs) react and evolve in response to client needs, which is a key aspect of social impact. However, the score seems too low considering that 69% of respondents gave the greenlight for enlarging service areas, indicating a significant level of investment in security infrastructure. Furthermore, the article mentions that CSPs are prioritizing other aspects such as DDoS protection and network monitoring, which suggests a strong focus on social impact. The only criticism is that the transition to IPv6 is still an ongoing challenge, but this seems like a minor issue compared to the overall emphasis on security investments.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article does not provide any direct evidence of technological advancements or innovations that CSPs have implemented to address security concerns.",
+        "evidence_quote": "",
+        "parse_failed": false
+      }
+    }
+  },
+  {
+    "identifier": "https://www.computerweekly.com/news/252529298/Ukraine-CERT-leaders-touch-down-in-London-for-talks",
+    "Content_Title": null,
+    "Date": "2023-01-19 00:00:00",
+    "Link": "https://www.computerweekly.com/news/252529298/Ukraine-CERT-leaders-touch-down-in-London-for-talks",
+    "dimensions": {
+      "Political": {
+        "score": 2,
+        "agrees_with_score": true,
+        "justification": "The article discusses Ukraine's cyber security efforts in London, including meetings with UK counterparts at the National Cyber Security Centre (NCSC) and bilateral discussions on improving cyber resilience.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Economic": {
+        "score": 0,
+        "agrees_with_score": false,
+        "justification": "The article mentions that Ukraine's cyber security leaders have been in London to discuss the latest developments in the conflict and build improved cyber resilience.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Social": {
+        "score": 0,
+        "agrees_with_score": true,
+        "justification": "The article mentions Ukraine's cyber security leaders meeting with UK counterparts at the National Cyber Security Centre (NCSC), discussing the latest developments in the conflict and building improved cyber resilience.",
+        "evidence_quote": "",
+        "parse_failed": false
+      },
+      "Technological": {
+        "score": 3,
+        "agrees_with_score": true,
+        "justification": "The article mentions that Ukraine's cyber security leaders have been in London to discuss the latest developments in the conflict and build improved cyber resilience.",
+        "evidence_quote": "Ukraine has defended itself resolutely in cyber space in the face of Russian aggression, and the UK has been proud to support that defence.",
+        "parse_failed": false
+      }
+    }
+  }
+]

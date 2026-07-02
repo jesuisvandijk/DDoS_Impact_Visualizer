@@ -6,6 +6,7 @@ import json
 import os
 import subprocess
 import sys
+import re
 
 from sentence_transformers import SentenceTransformer
 from transformers import AutoTokenizer, AutoModelForTokenClassification, pipeline as hf_pipeline
@@ -44,7 +45,7 @@ HDBSCAN_MIN_SAMPLES      = 3 # higher = more conservative, more noise
 MAX_CLUSTER_SIZE = 50   # clusters larger than this get sub-clustered automatically
 
 SUB_MCS = 4             # min_cluster_size for sub-clustering
-SUB_MS  = 2             # min_samples for sub-clustering — kept low since we're already working in a filtered, dense sub-space
+SUB_MS  = 2             # min_samples for sub-clustering
 
 UMAP_N_NEIGHBORS = 15    # 5-50, lower = more local structure
 UMAP_MIN_DIST    = 0.15   # 0.0-0.5, lower = tighter clusters
@@ -322,31 +323,58 @@ def generate_description(event_summary, df):
     client = Client(host="http://localhost:11434")
     descriptions = []
 
+    system_prompt = """You are a cybersecurity analyst who writes concise, factual incident summaries.
+
+STRICT RULES:
+- Respond ONLY in English, even if the source articles are in another language. Never output Dutch, German, French, or any other language.
+- Output exactly 3 sentences and nothing else.
+- Do not include any preamble, introduction, acknowledgement, or meta-commentary (e.g. no "Here is a summary", "Based on the articles", "Sure,", "Okay,").
+- Do not repeat these instructions or mention that you are an AI.
+- Start the first sentence immediately with the subject of the event (e.g. "A DDoS attack targeted...").
+- Sentence 1: what happened. Sentence 2: who was affected. Sentence 3: key technical details.
+- If the articles are unclear or conflicting, summarize the most consistent version of events rather than commenting on the inconsistency."""
+
     for _, row in tqdm(event_summary.iterrows(), total=len(event_summary), desc="Generating descriptions"):
         cluster_id = int(row["event_cluster"])
         articles = df[df["event_cluster"] == cluster_id]
         article_texts = articles["Content"].dropna().tolist()
         combined = "\n\n---\n\n".join(article_texts[:10])
 
-        prompt = f"""You are given {len(article_texts)} news articles that belong to the 
-        same DDoS event cluster. 
-        Summarize this DDoS event in English in 3 sentences: 
-        what happened, who was affected, key technical details. 
-        Start directly with the description, no introduction, presenting or affirmation.
+        prompt = f"""Below are {len(article_texts)} news articles (possibly in different languages) describing the same DDoS event.
 
-        Articles:
-        {combined}"""
+Articles:
+{combined}
+
+Write the 3-sentence English summary now, following the rules exactly. Begin your response with the first word of sentence 1 — no other text before it."""
 
         response = client.chat(
             model="llama3.2:1b",
-            messages=[{"role": "system", "content": "You are a cybersecurity analyst. Always respond in English, regardless of what language the source articles are written in."},
-                      {"role": "user", "content": prompt}],
-            options={"num_ctx": 8192, "num_predict": 200}
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": prompt}
+            ],
+            options={"num_ctx": 8192, "num_predict": 200, "temperature": 0.3}
         )
-        descriptions.append(response.message.content)
+
+        text = response.message.content.strip()
+        text = clean_description(text)
+        descriptions.append(text)
         print(f"Description for event {cluster_id} generated.")
+
     event_summary["description"] = descriptions
     return event_summary
+
+
+def clean_description(text: str) -> str:
+    preamble_patterns = [
+        r"^(sure|okay|ok|certainly|here is|here's|based on|summary:|as requested)[^.]*?:\s*",
+        r"^(sure|okay|ok|certainly)[,.\s]+",
+    ]
+    cleaned = text
+    for pattern in preamble_patterns:
+        cleaned = re.sub(pattern, "", cleaned, flags=re.IGNORECASE).strip()
+
+    return cleaned
 
 # ─────────────────────────────────────────────────────────────────────────────
 # Full pipeline
@@ -362,7 +390,6 @@ def run_pipeline():
         df = df[df['relevant'] == True].reset_index(drop=True)
         print(f"  Dropped {before - len(df)} non-cyber articles before clustering.")
     print(f"  {len(df)} news articles loaded from {DATA_FILE}.")
-
 
     # ── Step 2: NER ───────────────────────────────────────────────────────────
     print("\nStep 2: Extracting named entities...")
